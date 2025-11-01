@@ -18,7 +18,7 @@ const Register = () => {
 
     
     const res = await axios.post(
-        'http://localhost:3000/auth/register',
+        'https://chatgpt-clone-qz1s.onrender.com/auth/register',
         {
           fullName: {
             firstName: form.firstName,

@@ -20,7 +20,7 @@ const Login = () => {
         console.log(form);
         
         
-        axios.post("http://localhost:3000/auth/login", {
+        axios.post("https://chatgpt-clone-qz1s.onrender.com/auth/login", {
             email: form.email,
             password: form.password
         },
