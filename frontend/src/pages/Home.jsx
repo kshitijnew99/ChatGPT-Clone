@@ -55,8 +55,9 @@ const Home = () => {
     }
   }, [navigate])
 
-  // Base API URL (set via Vite env variable in production)
-  const API_BASE = import.meta.env.VITE_API_URL || 'https://chatgpt-clone-qz1s.onrender.com'
+  // Base API URL (set via Vite env variable in production).
+  // Fallback to same origin (useful when frontend is served from the backend host).
+  const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')
 
   // Hydrate chats from backend on mount (after login/route change)
   useEffect(() => {

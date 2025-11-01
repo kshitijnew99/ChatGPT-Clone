@@ -10,8 +10,13 @@ async function authUser(req,res,next){
     }
 
     try {
-        const decode = jwt.verify(token , process.env.JWT_TOKEN)
-    
+        const secret = process.env.JWT_SECRET || process.env.JWT_TOKEN
+        if (!secret) {
+            return res.status(500).json({ message: 'Server misconfiguration: JWT secret missing' })
+        }
+
+        const decode = jwt.verify(token , secret)
+
         const user =  await userModel.findById(decode.id)
 
         req.user = user
