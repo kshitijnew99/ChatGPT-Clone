@@ -55,11 +55,13 @@ const Home = () => {
     }
   }, [navigate])
 
+  // Base API URL (set via Vite env variable in production)
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+
   // Hydrate chats from backend on mount (after login/route change)
   useEffect(() => {
     if (!isAuthenticated) return
-
-    axios.get('http://localhost:3000/chat/', { withCredentials: true })
+    axios.get(`${API_BASE}/chat/`, { withCredentials: true })
       .then((res) => {
         dispatch(setChats(res.data.chats))
       })
@@ -71,7 +73,7 @@ const Home = () => {
         }
       })
 
-      const tempSocket = io("http://localhost:3000",{
+      const tempSocket = io(API_BASE,{
         withCredentials: true,
       });
 
@@ -96,7 +98,7 @@ const Home = () => {
 
     try {
       // Also create chat on the server (requires auth cookie)
-      const res = await axios.post('http://localhost:3000/chat/', { title }, { withCredentials: true })
+  const res = await axios.post(`${API_BASE}/chat/`, { title }, { withCredentials: true })
 
       console.log('New chat created on server:', res.data.chat)
 
@@ -115,7 +117,7 @@ const Home = () => {
 
   const getMessages = async (chatId) => {
     try {
-      const res = await axios.get(`http://localhost:3000/chat/${chatId}/messages`, { 
+      const res = await axios.get(`${API_BASE}/chat/${chatId}/messages`, { 
         withCredentials: true 
       })
       console.log('Fetched messages for chat:', chatId, res.data.messages)
