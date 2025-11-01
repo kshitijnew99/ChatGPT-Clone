@@ -12,7 +12,7 @@ const { createVectorMemory, queryMemory } = require("../services/vector.service"
 function initSocketServer(httpServer) {
   const io = new Server(httpServer, {
     cors: {
-      origin : "http://localhost:5173",
+      origin : process.env.FRONTEND_URL || "http://localhost:5173",
       allowedHeaders: ["Content-Type", "Authorization"],
       credentials: true
     }
@@ -29,12 +29,15 @@ function initSocketServer(httpServer) {
     }
 
     try {
-      const decode = jwt.verify(cookies.token, process.env.JWT_TOKEN);
+      const secret = process.env.JWT_SECRET || process.env.JWT_TOKEN
+      if (!secret) {
+        return next(new Error('Authentication error: server missing JWT secret'))
+      }
+      const decode = jwt.verify(cookies.token, secret);
 
       const user = await userModel.findById(decode.id);
 
       socket.user = user;
-      // console.log("User Connected :", socket.user);
 
       next();
     } catch (error) {
