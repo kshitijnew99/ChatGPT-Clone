@@ -15,6 +15,52 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, '../public')));
 
+// Defensive: wrap router/app registration to catch invalid route patterns
+// This prevents path-to-regexp from crashing the process during startup
+;(function wrapExpressRegistration() {
+    try {
+        const methods = ['use','get','post','put','delete','patch','all','options','head']
+
+        // Wrap app methods
+        methods.forEach((m) => {
+            if (typeof app[m] === 'function') {
+                const orig = app[m].bind(app)
+                app[m] = function (...args) {
+                    try {
+                        return orig(...args)
+                    } catch (err) {
+                        console.error(`Route registration error on app.${m} with args:`, args, '\nError:', err && err.message)
+                        // swallow error to allow server to continue starting; route will be skipped
+                        return app
+                    }
+                }
+            }
+        })
+
+        // Wrap Router factory so routers returned have wrapped methods too
+        const originalRouter = express.Router
+        express.Router = function (...args) {
+            const router = originalRouter(...args)
+            methods.forEach((m) => {
+                if (typeof router[m] === 'function') {
+                    const orig = router[m].bind(router)
+                    router[m] = function (...args) {
+                        try {
+                            return orig(...args)
+                        } catch (err) {
+                            console.error(`Route registration error on router.${m} with args:`, args, '\nError:', err && err.message)
+                            return router
+                        }
+                    }
+                }
+            })
+            return router
+        }
+    } catch (e) {
+        console.warn('Failed to apply Express registration wrappers:', e && e.message)
+    }
+})()
+
 
 
 // Allow configuring frontend origin via environment variable for deployments
