@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { createChat, setActiveChat, addMessageToChat, setChatTitle , setChats } from '../store/chatSlice'
+import { createChat, setActiveChat, addMessageToChat, setChatTitle, setChats } from '../store/chatSlice'
 import SidebarContent from '../components/chat/SidebarContent'
 import ChatHeader from '../components/chat/ChatHeader'
 import ChatMessages from '../components/chat/ChatMessages'
@@ -24,7 +24,7 @@ const Home = () => {
   const [input, setInput] = useState('')
   // Socket state
   const [Socket, setSocket] = useState(null)
-  
+
   // Check authentication
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
@@ -59,7 +59,7 @@ const Home = () => {
   useEffect(() => {
     if (!isAuthenticated) return
 
-    axios.get('http://localhost:3000/chat/', { withCredentials: true })
+    axios.get('https://gpt-clone-lzuc.onrender.com/chat/', { withCredentials: true })
       .then((res) => {
         dispatch(setChats(res.data.chats))
       })
@@ -71,19 +71,19 @@ const Home = () => {
         }
       })
 
-      const tempSocket = io("http://localhost:3000",{
-        withCredentials: true,
-      });
+    const tempSocket = io("https://gpt-clone-lzuc.onrender.com", {
+      withCredentials: true,
+    });
 
-      tempSocket.on("ai-response", (message) => {
-        console.log("Received AI response :",message);
-        dispatch(addMessageToChat({ chatId: message.chat, role: 'model', text: message.content }));
-      })
-      
-      setSocket(tempSocket);
+    tempSocket.on("ai-response", (message) => {
+      console.log("Received AI response :", message);
+      dispatch(addMessageToChat({ chatId: message.chat, role: 'model', text: message.content }));
+    })
+
+    setSocket(tempSocket);
   }, [isAuthenticated])
 
-  const createNewChat =  async () => {
+  const createNewChat = async () => {
     // Check authentication
     if (!isAuthenticated) {
       navigate('/register')
@@ -96,13 +96,13 @@ const Home = () => {
 
     try {
       // Also create chat on the server (requires auth cookie)
-      const res = await axios.post('http://localhost:3000/chat/', { title }, { withCredentials: true })
+      const res = await axios.post('https://gpt-clone-lzuc.onrender.com/chat/', { title }, { withCredentials: true })
 
       console.log('New chat created on server:', res.data.chat)
 
       // Create chat locally (Redux) with the given title and activate it
       dispatch(createChat(res.data.chat))
-      
+
       setDrawerOpen(false)
     } catch (error) {
       console.error('Error creating chat:', error)
@@ -115,16 +115,16 @@ const Home = () => {
 
   const getMessages = async (chatId) => {
     try {
-      const res = await axios.get(`http://localhost:3000/chat/${chatId}/messages`, { 
-        withCredentials: true 
+      const res = await axios.get(`https://gpt-clone-lzuc.onrender.com/chat/${chatId}/messages`, {
+        withCredentials: true
       })
       console.log('Fetched messages for chat:', chatId, res.data.messages)
-      
+
       // Load messages into Redux for this chat (one by one to maintain order)
       res.data.messages.forEach(msg => {
-        dispatch(addMessageToChat({ 
-          chatId: chatId, 
-          role: msg.role, 
+        dispatch(addMessageToChat({
+          chatId: chatId,
+          role: msg.role,
           text: msg.content,
           skipSave: true // Flag to avoid moving chat to top for historical messages
         }))
@@ -145,7 +145,7 @@ const Home = () => {
 
   const sendMessage = async (e) => {
     e.preventDefault()
-    
+
     // Check authentication
     if (!isAuthenticated) {
       navigate('/register')
@@ -154,7 +154,7 @@ const Home = () => {
 
     const text = input.trim()
     console.log("sendMessage:", text);
-    
+
     if (!text) return
 
     // Add user message to redux
@@ -190,7 +190,7 @@ const Home = () => {
       </aside>
 
       {/* Main chat area */}
-  <section className={`chat-main ${messages.length === 0 ? 'landing' : ''}`}>
+      <section className={`chat-main ${messages.length === 0 ? 'landing' : ''}`}>
         {/* Mobile top bar with hamburger */}
         <div className="chat-mobilebar">
           <button className="hamburger" onClick={() => setDrawerOpen(true)}>☰</button>
@@ -208,7 +208,7 @@ const Home = () => {
                   setInput={setInput}
                   onSubmit={sendMessage}
                   variant="landing"
-                /> 
+                />
               </div>
             </div>
             <div className="show-mobile">
@@ -223,7 +223,7 @@ const Home = () => {
             <ChatComposer input={input} setInput={setInput} onSubmit={sendMessage} />
           </>
         )}
-  </section>
+      </section>
 
       {/* Mobile drawer */}
       <div className={`drawer ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)}>

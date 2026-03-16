@@ -218,7 +218,8 @@ User Login
 ### Frontend
 
 The frontend uses environment variables via Vite:
-- API endpoint is hardcoded to `http://localhost:3000`
+- API endpoint is hardcoded to `https://gpt-clone-lzuc.onrender.com
+`
 - For production, update all API URLs in the codebase
 
 ## 📁 Project Structure
